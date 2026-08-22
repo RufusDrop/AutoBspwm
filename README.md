@@ -6,59 +6,41 @@
 > aislados para que la sesión normal de Kali no cambie. Consulta
 > [`docs/KALI-2025.2.md`](docs/KALI-2025.2.md) antes de instalar.
 
-Este es un script de instalación de BSPWM para kali o parrot linux, cabe aclarar que puede funcionar en otras distribuciones base debian sin embargo en las unicas que se mantiene estable y las cuales les daremos soporte será Kali linux y Parrot linux
+## Instalación en Kali
 
-## [Instalación]
-(AVISO: No ejecutes el script como ROOT o SUDO, el script te pedirá tu contraseña por cuenta propia, si lo ejecutas como root la instalación se detendrá)
+No ejecutes el instalador como `root` ni con `sudo`. Él mismo solicitará la
+contraseña solo para APT y para registrar la sesión de LightDM.
 
-Si necesitas más ayuda con esta instalación aquí tienes un video tutorial.
-
-TUTORIAL: [![TUTORIAL]](https://youtu.be/h2Au2ebTXJc?feature=shared)
-
-1.- Uso del Script 
-
-```
-git clone https://github.com/ZLCube/AutoBspwm.git
-```
-```
+```bash
+git clone <URL-DE-ESTE-FORK> AutoBspwm
 cd AutoBspwm
-```
-```
-chmod +x AutoInstall.sh
-```
-```
+chmod +x AutoInstall.sh install.sh theme.sh
 ./AutoInstall.sh
 ```
-2.- Selecciona tu sistema operativo, 1 kali 2 parrot.
 
-![](https://github.com/ZLCube/AutoBspwm/blob/main/pics/menu.png)
+El instalador crea una copia preventiva del historial y de la configuración de
+Zsh. Después muestra **un único selector Rofi de perfiles**. Elegir `Nord` o
+`Matterhorn` ahí configura conjuntamente BSPWM, Polybar, Picom, Kitty, Rofi y
+Powerlevel10k. No se abre `rofi-theme-selector`.
 
-3.- Nos va a saltar un theme selector NO SELECCIONES NADA AUN ignoralo
+Al terminar, cierra la sesión; no es necesario reiniciar. En LightDM elige
+**AutoBspwm**. Para volver al escritorio sin personalizar, elige la sesión
+predeterminada de Kali. La entrada genérica **BSPWM** no carga el aislamiento
+de este fork.
 
-![](https://github.com/ZLCube/AutoBspwm/blob/main/pics/themes.png)
+Para cambiar el perfil más tarde, ejecuta desde cualquier sesión gráfica:
 
-4.- Una vez nos salga la pantalla de select theme entonces podremos elegir cualquier tema del paso 3
+```bash
+cd ~/AutoBspwm
+./theme.sh
+```
 
-![](https://github.com/ZLCube/AutoBspwm/blob/main/pics/select.png)
-
-5.- Este menu es el rofi theme selector, para navegar entre los themes podemos usar flecha hacia arriba + enter, para seleccionar el que nos guste apretaremos alt + a.
-
-![](https://github.com/ZLCube/AutoBspwm/blob/main/pics/rofi.png)
-
-En caso de querer cambiarlo nuevamente podemos escribir en consola ```rofi -theme selector```
-
-6.- Por ultimo la maquina se va a rebootear automaticamente, aquí cambiaremos de sesión arriba a la derecha cambiando de entorno default a BSPWM
-
-![](https://github.com/ZLCube/AutoBspwm/blob/main/pics/bspwm.png)
-
-7.- Wallpaper
-
-Para cambiar el wallpaper usaremos el comando
-``` nano .config/bspwm/bspwmrc ``` y renombrando el apartado wallpaper con el nombre del wallpaper de tu eleccion en la carpeta ```~/.config/Wallpaper/```.
+Para cambiar el fondo, edita el `bspwmrc` del perfil activo bajo
+`~/.config/autobspwm/profiles/<Perfil>/bspwm/bspwmrc`.
 
 La configuración es la misma que el entorno de s4vitar al menos en cuanto a shortcuts y terminal se refiere.
 
-8.- Nvim
+## Nvim
 
 Esta no esta incluida en el scripts
 

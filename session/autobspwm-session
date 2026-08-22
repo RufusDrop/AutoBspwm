@@ -2,8 +2,19 @@
 # Launch BSPWM with an isolated XDG configuration tree.
 set -eu
 
-base_config="${XDG_CONFIG_HOME:-$HOME/.config}"
-active_profile="$base_config/autobspwm/active"
+base_config="$HOME/.config"
+profile_pointer="$base_config/autobspwm/active-profile"
+profile_name="$(sed -n '1p' "$profile_pointer" 2>/dev/null || true)"
+
+case "$profile_name" in
+  ''|*[!A-Za-z0-9_-]*)
+    command -v notify-send >/dev/null 2>&1 && \
+      notify-send 'AutoBspwm' 'No hay un perfil válido. Ejecuta install.sh.'
+    exit 1
+    ;;
+esac
+
+active_profile="$base_config/autobspwm/profiles/$profile_name"
 
 if [ ! -x "$active_profile/bspwm/bspwmrc" ]; then
   command -v notify-send >/dev/null 2>&1 && \

@@ -9,13 +9,13 @@ configuration {
 }
 
 * {
-  background: #2E3440;
-  background-color: #2E3440;
-  bg-alt: #3B4252;
-  fg: #ECEFF4;
+  background: #0B1120;
+  background-color: #0B1120;
+  bg-alt: #14213A;
+  fg: #D9E7FF;
 
-  nord-blue-light: #88C0D0;
-  nord-yellow: #A8D7FE;
+  nord-blue-light: #62A0EA;
+  nord-yellow: #67D4E7;
 
   border: 0;
   lines: 12;
