@@ -1,376 +1,108 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Apply one profile without deleting unrelated user configuration.
+set -Eeuo pipefail
 
-ruta=$(pwd)
-user=$(whoami)
+if [[ ${EUID} -eq 0 ]]; then
+  echo "Ejecuta theme.sh con tu usuario normal, sin sudo." >&2
+  exit 1
+fi
 
-opciones()
-{
-    zenity --list --title="Selecciona una opción" --column="Elige una opción: " "$@"
+repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+themes=(Pacman Parrot S4vi Cinnamoroll Pink ZLCube Legion Kazerg Zeneapp Matterhorn Nord)
+
+theme_config_dir() {
+  local theme=$1
+  if [[ -d "$repo_dir/Themes/$theme/Config" ]]; then
+    printf '%s\n' "$repo_dir/Themes/$theme/Config"
+  elif [[ -d "$repo_dir/Themes/$theme/config" ]]; then
+    printf '%s\n' "$repo_dir/Themes/$theme/config"
+  else
+    return 1
+  fi
 }
 
-Pacman_theme()
-{
-	#Damos permisos de ejecución 
-	sudo chmod +x $ruta/Themes/Pacman/.p10k.zsh
-	sudo chmod +x $ruta/Themes/Pacman/.p10k.zsh-root
-	sudo chmod +x $ruta/Themes/Pacman/Config/bspwm/bspwmrc 
-    sudo chmod +x $ruta/Themes/Pacman/Config/bspwm/scripts/bspwm_resize 
-    sudo chmod +x $ruta/Themes/Pacman/Config/bin/ethernet_status.sh
-    sudo chmod +x $ruta/Themes/Pacman/Config/bin/htb_status.sh 
-    sudo chmod +x $ruta/Themes/Pacman/Config/bin/htb_target.sh 
-    sudo chmod +x $ruta/Themes/Pacman/Config/polybar/launch.sh 
-    sudo chmod +x /usr/local/bin/whichSystem.py 
-    sudo chmod +x /usr/local/bin/screenshot 
-	#Limpiamos viejos dot files
-	sudo rm -rf	~/.p10k.zsh
-	sudo rm -rf	/root/.p10k.zsh
-	sudo rm -rf ~/.config/bspwm
-	sudo rm -rf ~/.config/bin
-	sudo rm -rf ~/.config/picom
-	sudo rm -rf ~/.config/polybar
-	sudo rm -rf ~/.config/rofi
-	sudo rm -rf ~/.config/Wallpaper
-	#Movemos los dot files
-	sudo cp -v $ruta/cinn2.jpg ~/Wallpaper/
-    sudo cp -v $ruta/Themes/Pacman/.p10k.zsh ~/.p10k.zsh
-    sudo cp -v $ruta/Themes/Pacman/.p10k.zsh-root /root/.p10k.zsh
-    echo "p10k setup"
-	sudo cp -rv $ruta/Themes/Pacman/Config/* ~/.config/
-	sudo chown $user:$user ~/.config/bin/* 
-	echo "config setup"
-    rofi-theme-selector
-    echo "Pacman theme instalado"
-    kill -9 -1
+choose_theme() {
+  if [[ $# -gt 0 ]]; then
+    printf '%s\n' "$1"
+  elif command -v zenity >/dev/null 2>&1 && [[ -n ${DISPLAY:-} ]]; then
+    zenity --list --title='AutoBspwm: seleccionar perfil' \
+      --column='Perfil' --height=480 "${themes[@]}"
+  else
+    PS3='Perfil: '
+    select selected in "${themes[@]}"; do
+      [[ -n ${selected:-} ]] && { printf '%s\n' "$selected"; return; }
+      echo 'Selección no válida.' >&2
+    done
+  fi
 }
 
-Parrot_theme()
-{
-	#Damos permisos de ejecución 
-	sudo chmod +x $ruta/Themes/Parrot/.p10k.zsh
-	sudo chmod +x $ruta/Themes/Parrot/.p10k.zsh-root
-	sudo chmod +x $ruta/Themes/Parrot/Config/bspwm/bspwmrc 
-    sudo chmod +x $ruta/Themes/Parrot/Config/bspwm/scripts/bspwm_resize 
-    sudo chmod +x $ruta/Themes/Parrot/Config/bin/ethernet_status.sh
-    sudo chmod +x $ruta/Themes/Parrot/Config/bin/htb_status.sh 
-    sudo chmod +x $ruta/Themes/Parrot/Config/bin/htb_target.sh 
-    sudo chmod +x $ruta/Themes/Parrot/Config/polybar/launch.sh 
-    sudo chmod +x /usr/local/bin/whichSystem.py 
-    sudo chmod +x /usr/local/bin/screenshot 
-	#Limpiamos viejos dot files
-	sudo rm -rf	~/.p10k.zsh
-	sudo rm -rf	/root/.p10k.zsh
-	sudo rm -rf ~/.config/bspwm
-	sudo rm -rf ~/.config/bin
-	sudo rm -rf ~/.config/picom
-	sudo rm -rf ~/.config/polybar
-	sudo rm -rf ~/.config/rofi
-	sudo rm -rf ~/.config/Wallpaper
-	#Movemos los dot files
-    sudo cp -v $ruta/Themes/Parrot/.p10k.zsh ~/.p10k.zsh
-    sudo cp -v $ruta/Themes/Parrot/.p10k.zsh-root /root/.p10k.zsh
-    echo "p10k setup"
-	sudo cp -rv $ruta/Themes/Parrot/Config/* ~/.config/
-	sudo chown $user:$user ~/.config/bin/* 
-	echo "config setup"
-    rofi-theme-selector
-    echo "Parrot theme instalado"
-    kill -9 -1
+if [[ $# -gt 0 ]]; then
+  profile="$1"
+else
+  profile="$(choose_theme)" || exit 0
+fi
+if [[ ! " ${themes[*]} " =~ " $profile " ]]; then
+  echo "Perfil no válido: $profile" >&2
+  exit 2
+fi
+
+source_dir="$(theme_config_dir "$profile")" || {
+  echo "El perfil $profile no tiene directorio de configuración." >&2
+  exit 1
 }
 
-S4vi_theme()
-{
-	#Damos permisos de ejecución 
-	sudo chmod +x $ruta/Themes/S4vi/.p10k.zsh
-	sudo chmod +x $ruta/Themes/S4vi/.p10k.zsh-root
-	sudo chmod +x $ruta/Themes/S4vi/Config/bspwm/bspwmrc 
-    sudo chmod +x $ruta/Themes/S4vi/Config/bspwm/scripts/bspwm_resize 
-    sudo chmod +x $ruta/Themes/S4vi/Config/bin/ethernet_status.sh
-    sudo chmod +x $ruta/Themes/S4vi/Config/bin/htb_status.sh 
-    sudo chmod +x $ruta/Themes/S4vi/Config/bin/htb_target.sh 
-    sudo chmod +x $ruta/Themes/S4vi/Config/polybar/launch.sh 
-    sudo chmod +x /usr/local/bin/whichSystem.py 
-    sudo chmod +x /usr/local/bin/screenshot 
-	#Limpiamos viejos dot files
-	sudo rm -rf	~/.p10k.zsh
-	sudo rm -rf	/root/.p10k.zsh
-	sudo rm -rf ~/.config/bspwm
-	sudo rm -rf ~/.config/bin
-	sudo rm -rf ~/.config/picom
-	sudo rm -rf ~/.config/polybar
-	sudo rm -rf ~/.config/rofi
-	sudo rm -rf ~/.config/Wallpaper
-	#Movemos los dot files
-    sudo cp -v $ruta/Themes/S4vi/.p10k.zsh ~/.p10k.zsh
-    sudo cp -v $ruta/Themes/S4vi/.p10k.zsh-root /root/.p10k.zsh
-    echo "p10k setup"
-	sudo cp -rv $ruta/Themes/S4vi/Config/* ~/.config/
-	sudo chown $user:$user ~/.config/bin/* 
-	echo "config setup"
-    rofi-theme-selector
-    echo "S4vi theme instalado"
-    kill -9 -1
-}
+timestamp="$(date +%Y%m%d-%H%M%S)-$$"
+backup_dir="$HOME/.config/autobspwm-backups/$timestamp"
+managed=(bspwm bin picom polybar Wallpaper wallpapers)
+install -d "$backup_dir"
 
-Cinnamoroll_theme()
-{
-	#Damos permisos de ejecución 
-	sudo chmod +x $ruta/Themes/cin/.p10k.zsh
-	sudo chmod +x $ruta/Themes/cin/.p10k.zsh-root
-	sudo chmod +x $ruta/Themes/cin/config/bspwm/bspwmrc 
-    sudo chmod +x $ruta/Themes/cin/config/bspwm/scripts/bspwm_resize 
-    sudo chmod +x $ruta/Themes/cin/config/bin/ethernet_status.sh
-    sudo chmod +x $ruta/Themes/cin/config/bin/htb_status.sh 
-    sudo chmod +x $ruta/Themes/cin/config/bin/htb_target.sh 
-    sudo chmod +x $ruta/Themes/cin/config/polybar/launch.sh 
-    sudo chmod +x /usr/local/bin/whichSystem.py 
-    sudo chmod +x /usr/local/bin/screenshot 
-	#Limpiamos viejos dot files
-	sudo rm -rf	~/.p10k.zsh
-	sudo rm -rf	/root/.p10k.zsh
-	sudo rm -rf ~/.config/bspwm
-	sudo rm -rf ~/.config/bin
-	sudo rm -rf ~/.config/picom
-	sudo rm -rf ~/.config/polybar
-	sudo rm -rf ~/.config/rofi
-	sudo rm -rf ~/.config/Wallpaper
-	#Movemos los dot files
-    sudo cp -v $ruta/Themes/cin/.p10k.zsh ~/.p10k.zsh
-    sudo cp -v $ruta/Themes/cin/.p10k.zsh-root /root/.p10k.zsh
-    echo "p10k setup"
-	sudo cp -rv $ruta/Themes/cin/config/* ~/.config/
-	sudo cp -rv $ruta/cin2.jpg ~/Wallpaper/
-	sudo chown $user:$user ~/.config/bin/* 
-	echo "config setup"
- 	#Install Font for cinnamoroll icons
-	mkdir ~/.fonts
-	sudo cp $ruta/fonts/fontello.ttf ~/.fonts/
-	fc-cache
+for item in "${managed[@]}"; do
+  if [[ -e "$HOME/.config/$item" ]]; then
+    mv "$HOME/.config/$item" "$backup_dir/$item"
+  fi
+done
 
-	#Move neofetch
-	sudo cp $ruta/cnn ~/.cnn 
-    rofi-theme-selector
-    echo "Cinnamoroll theme instalado"
-    kill -9 -1
-}
+for item in "${managed[@]}"; do
+  if [[ -e "$source_dir/$item" ]]; then
+    cp -a "$source_dir/$item" "$HOME/.config/"
+  fi
+done
 
-Pink_theme()
-{
-	#Damos permisos de ejecución 
-	sudo chmod +x $ruta/Themes/Pink/.p10k.zsh
-	sudo chmod +x $ruta/Themes/Pink/.p10k.zsh-root
-	sudo chmod +x $ruta/Themes/Pink/Config/bspwm/bspwmrc 
-    sudo chmod +x $ruta/Themes/Pink/Config/bspwm/scripts/bspwm_resize 
-    sudo chmod +x $ruta/Themes/Pink/Config/bin/ethernet_status.sh
-    sudo chmod +x $ruta/Themes/Pink/Config/bin/htb_status.sh 
-    sudo chmod +x $ruta/Themes/Pink/Config/bin/htb_target.sh 
-    sudo chmod +x $ruta/Themes/Pink/Config/polybar/launch.sh 
-    sudo chmod +x /usr/local/bin/whichSystem.py 
-    sudo chmod +x /usr/local/bin/screenshot 
-	#Limpiamos viejos dot files
-	sudo rm -rf	~/.p10k.zsh
-	sudo rm -rf	/root/.p10k.zsh
-	sudo rm -rf ~/.config/bspwm
-	sudo rm -rf ~/.config/bin
-	sudo rm -rf ~/.config/picom
-	sudo rm -rf ~/.config/polybar
-	sudo rm -rf ~/.config/rofi
-	sudo rm -rf ~/.config/Wallpaper
-	#Movemos los dot files
-    sudo cp -v $ruta/Themes/Pink/.p10k.zsh ~/.p10k.zsh
-    sudo cp -v $ruta/Themes/Pink/.p10k.zsh-root /root/.p10k.zsh
-    echo "p10k setup"
-	sudo cp -rv $ruta/Themes/Pink/Config/* ~/.config/
-	sudo chown $user:$user ~/.config/bin/* 
-	echo "config setup"
-    rofi-theme-selector
-    echo "Pink theme instalado"
-    kill -9 -1
-}
+# VMware images now use open-vm-tools' vmware-user binary. Older profiles
+# called a removed wrapper and produced an error at every BSPWM login.
+bspwmrc="$HOME/.config/bspwm/bspwmrc"
+if [[ -f "$bspwmrc" ]]; then
+  sed -i 's|^[[:space:]]*vmware-user-suid-wrapper[[:space:]]*\&[[:space:]]*$|command -v vmware-user >/dev/null 2>\&1 \&\& vmware-user \&|' "$bspwmrc"
+fi
 
-ZLCube_theme()
-{
-	#Damos permisos de ejecución 
-	sudo chmod +x $ruta/Themes/ZLCube/.p10k.zsh
-	sudo chmod +x $ruta/Themes/ZLCube/.p10k.zsh-root
-	sudo chmod +x $ruta/Themes/ZLCube/Config/bspwm/bspwmrc 
-    sudo chmod +x $ruta/Themes/ZLCube/Config/bspwm/scripts/bspwm_resize 
-    sudo chmod +x $ruta/Themes/ZLCube/Config/bin/ethernet_status.sh
-    sudo chmod +x $ruta/Themes/ZLCube/Config/bin/htb_status.sh 
-    sudo chmod +x $ruta/Themes/ZLCube/Config/bin/htb_target.sh 
-    sudo chmod +x $ruta/Themes/ZLCube/Config/polybar/launch.sh 
-    sudo chmod +x /usr/local/bin/whichSystem.py 
-    sudo chmod +x /usr/local/bin/screenshot 
-	#Limpiamos viejos dot files
-	sudo rm -rf	~/.p10k.zsh
-	sudo rm -rf	/root/.p10k.zsh
-	sudo rm -rf ~/.config/bspwm
-	sudo rm -rf ~/.config/bin
-	sudo rm -rf ~/.config/picom
-	sudo rm -rf ~/.config/polybar
-	sudo rm -rf ~/.config/rofi
-	sudo rm -rf ~/.config/Wallpaper
-	#Movemos los dot files
-    sudo cp -v $ruta/Themes/ZLCube/.p10k.zsh ~/.p10k.zsh
-    sudo cp -v $ruta/Themes/ZLCube/.p10k.zsh-root /root/.p10k.zsh
-    echo "p10k setup"
-	sudo cp -rv $ruta/Themes/ZLCube/Config/* ~/.config/
-	sudo chown $user:$user ~/.config/bin/* 
-	echo "config setup"
-    rofi-theme-selector
-    echo "ZLCube theme instalado"
-    kill -9 -1
-}
+# Persist user preferences outside theme directories so switching profiles does
+# not reset them. New installs keep the requested Spanish (Spain) layout.
+local_dir="$HOME/.config/autobspwm"
+local_file="$local_dir/local.sh"
+install -d "$local_dir"
+if [[ ! -f "$local_file" ]]; then
+  cat >"$local_file" <<'EOF'
+#!/usr/bin/env sh
+# Local preferences preserved by AutoBspwm when changing profiles.
+# Change this line if you later want a different XKB layout.
+setxkbmap -layout es -variant '' -option ''
+EOF
+  chmod 700 "$local_file"
+fi
 
-Legion_theme()
-{
-	#Damos permisos de ejecución 
-	sudo chmod +x $ruta/Themes/Legion/.p10k.zsh
-	sudo chmod +x $ruta/Themes/Legion/.p10k.zsh-root
-	sudo chmod +x $ruta/Themes/Legion/Config/bspwm/bspwmrc 
-    sudo chmod +x $ruta/Themes/Legion/Config/bspwm/scripts/bspwm_resize 
-    sudo chmod +x $ruta/Themes/Legion/Config/bin/ethernet_status.sh
-    sudo chmod +x $ruta/Themes/Legion/Config/bin/htb_status.sh 
-    sudo chmod +x $ruta/Themes/Legion/Config/bin/htb_target.sh 
-    sudo chmod +x $ruta/Themes/Legion/Config/polybar/launch.sh 
-    sudo chmod +x /usr/local/bin/whichSystem.py 
-    sudo chmod +x /usr/local/bin/screenshot 
-	#Limpiamos viejos dot files
-	sudo rm -rf ~/.p10k.zsh
-	sudo rm -rf /root/.p10k.zsh
-	sudo rm -rf ~/.config/bspwm
-	sudo rm -rf ~/.config/bin
-	sudo rm -rf ~/.config/picom
-	sudo rm -rf ~/.config/polybar
-	sudo rm -rf ~/.config/rofi
-	sudo rm -rf ~/.config/Wallpaper
- 	sudo rm -rf ~/.config/kitty
-  	#sudo rm -rf ~/.config/neofetch
-   	sudo rm -rf ~/.config/wallpapers
-	#Movemos los dot files
-    sudo cp -v $ruta/Themes/Legion/.p10k.zsh ~/.p10k.zsh
-    sudo cp -v $ruta/Themes/Legion/.p10k.zsh-root /root/.p10k.zsh
-    echo "p10k setup"
-	sudo cp -rv $ruta/Themes/Legion/config/* ~/.config/
-	sudo chown $user:$user ~/.config/bin/* 
-	echo "config setup"
-    rofi-theme-selector
-    echo "Legion theme instalado"
-    kill -9 -1
-}
+if [[ -f "$bspwmrc" ]] && ! grep -Fq 'autobspwm/local.sh' "$bspwmrc"; then
+  cat >>"$bspwmrc" <<'EOF'
 
-Kazerg_theme()
-{
-	
-	#Damos permisos de ejecución 
-	sudo chmod +x $ruta/Themes/Kazerg/.p10k.zsh
-	sudo chmod +x $ruta/Themes/Kazerg/.p10k.zsh-root
-	sudo chmod +x $ruta/Themes/Kazerg/Config/bspwm/bspwmrc 
-    sudo chmod +x $ruta/Themes/Kazerg/Config/bspwm/scripts/bspwm_resize 
-    sudo chmod +x $ruta/Themes/Kazerg/Config/bin/ethernet_status.sh
-    sudo chmod +x $ruta/Themes/Kazerg/Config/bin/htb_status.sh 
-    sudo chmod +x $ruta/Themes/Kazerg/Config/bin/htb_target.sh 
-    sudo chmod +x $ruta/Themes/Kazerg/Config/polybar/launch.sh 
-    sudo chmod +x /usr/local/bin/whichSystem.py 
-    sudo chmod +x /usr/local/bin/screenshot
-    sudo chmod +x /usr/local/bin/settarget
-    sudo chmod +x /usr/local/bin/kitty_start 
-	#Limpiamos viejos dot files
-	sudo rm -rf	~/.p10k.zsh
-	sudo rm -rf	/root/.p10k.zsh
-	sudo rm -rf ~/.config/bspwm
-	sudo rm -rf ~/.config/bin
-	sudo rm -rf ~/.config/picom
-	sudo rm -rf ~/.config/polybar
-	sudo rm -rf ~/.config/rofi
-	sudo rm -rf ~/.config/Wallpaper
-	#Movemos los dot files
-    sudo cp -v $ruta/Themes/Kazerg/.p10k.zsh ~/.p10k.zsh
-    sudo cp -v $ruta/Themes/Kazerg/.p10k.zsh-root /root/.p10k.zsh
-    echo "p10k setup"
-	sudo cp -rv $ruta/Themes/Kazerg/Config/* ~/.config/
-	sudo chown $user:$user ~/.config/bin/* 
-	echo "config setup"
-    rofi-theme-selector
-    echo "Kazerg theme instalado"
-    kill -9 -1
-}
+# Keep local keyboard and other personal preferences across profile changes.
+[ -r "$HOME/.config/autobspwm/local.sh" ] && . "$HOME/.config/autobspwm/local.sh"
+EOF
+fi
 
+find "$HOME/.config/bspwm" -type f -name 'bspwmrc' -exec chmod 700 {} + 2>/dev/null || true
+find "$HOME/.config/bspwm/scripts" -type f -exec chmod 700 {} + 2>/dev/null || true
+find "$HOME/.config/bin" -type f -name '*.sh' -exec chmod 700 {} + 2>/dev/null || true
+find "$HOME/.config/polybar" -type f -name '*.sh' -exec chmod 700 {} + 2>/dev/null || true
 
-Zeneapp_theme()
-{
-	
-	#Damos permisos de ejecución 
-	sudo chmod +x $ruta/Themes/Zeneapp/.p10k.zsh
-	sudo chmod +x $ruta/Themes/Zeneapp/.p10k.zsh-root
-	sudo chmod +x $ruta/Themes/Zeneapp/Config/bspwm/bspwmrc 
-    sudo chmod +x $ruta/Themes/Zeneapp/Config/bspwm/scripts/bspwm_resize 
-    sudo chmod +x $ruta/Themes/Zeneapp/Config/bin/ethernet_status.sh
-    sudo chmod +x $ruta/Themes/Zeneapp/Config/bin/htb_status.sh 
-    sudo chmod +x $ruta/Themes/Zeneapp/Config/bin/htb_target.sh 
-    sudo chmod +x $ruta/Themes/Zeneapp/Config/polybar/launch.sh 
-    sudo chmod +x /usr/local/bin/whichSystem.py 
-    sudo chmod +x /usr/local/bin/screenshot
-    sudo chmod +x /usr/local/bin/settarget
-    sudo chmod +x /usr/local/bin/kitty_start 
-	#Limpiamos viejos dot files
-	sudo rm -rf	~/.p10k.zsh
-	sudo rm -rf	/root/.p10k.zsh
-	sudo rm -rf ~/.config/bspwm
-	sudo rm -rf ~/.config/bin
-	sudo rm -rf ~/.config/picom
-	sudo rm -rf ~/.config/polybar
-	sudo rm -rf ~/.config/rofi
-	sudo rm -rf ~/.config/Wallpaper
-	#Movemos los dot files
-    sudo cp -v $ruta/Themes/Zeneapp/.p10k.zsh ~/.p10k.zsh
-    sudo cp -v $ruta/Themes/Zeneapp/.p10k.zsh-root /root/.p10k.zsh
-    echo "p10k setup"
-	sudo cp -rv $ruta/Themes/Zeneapp/Config/* ~/.config/
-	sudo chown $user:$user ~/.config/bin/* 
-	echo "config setup"
-    rofi-theme-selector
-    sudo 
-    echo "Zeneapp theme instalado"
-    kill -9 -1
-}
-
-selected_option=$(opciones "Pacman" "Parrot" "S4vi" "Cinnamoroll" "Pink" "ZLCube" "Legion" "Kazerg" "Zeneapp")
-
-
-case "$selected_option" in
-    "Pacman")
-        Pacman_theme
-        ;;
-    "Legion")
-        Legion_theme
-        ;;
-    "Parrot")
-        Parrot_theme
-        ;;
-    "S4vi")
-        S4vi_theme
-        ;;
-    "Cinnamoroll")
-        Cinnamoroll_theme
-        ;;
-    "Pink")
-        Pink_theme
-        ;;
-	
-    "ZLCube")
-        ZLCube_theme
-        ;;
-
-    "Kazerg")
-	Kazerg_theme
-	;;
-    
-    "Zeneapp")
-	Zeneapp_theme
-	;;
-
-
-    *)
-        echo "Selección inválida."
-        ;;
-esac
+echo "Perfil $profile aplicado. Copia de seguridad: $backup_dir"
+echo "El teclado español se carga desde $local_file"
+echo "Cierra la sesión y elige BSPWM o la sesión predeterminada de Kali en LightDM."

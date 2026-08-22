@@ -1,55 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# AutoBspwm launcher for current Kali Linux releases.
+set -Eeuo pipefail
 
-ruta=$(pwd)
+if [[ ${EUID} -eq 0 ]]; then
+  echo "Ejecuta este script con tu usuario normal, no como root ni con sudo." >&2
+  exit 1
+fi
 
-chmod +x $ruta/theme.sh
-chmod +x $ruta/install.sh
+repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+cd "$repo_dir"
 
-menu()
-{
-	echo -e "\033[32m#-------------------------------------------------------------#\033[0m"
-	echo -e "\033[32m#                        31/07/2023                           #\033[0m"
-	echo -e "\033[32m#-------------------------------------------------------------#\033[0m"
-	echo -e "\033[32m#   By: ZLCube, xsJacksx, S4vitar, MrPr1ngles, Elisaelias02   #\033[0m"
-	echo -e "\033[32m#-------------------------------------------------------------#\033[0m"
-	echo -e "\033[32m#    ___        _       ______                                #\033[0m"
-	echo -e "\033[32m#   / _ \      | |      | ___ \                               #\033[0m"
-	echo -e "\033[32m#  / /_\ \_   _| |_ ___ | |_/ / ___ _ ____      ___ __ ___    #\033[0m"
-	echo -e "\033[32m#  |  _  | | | | __/ _ \| ___ \/ __| '_ \ \ /\ / / '_ ' _ \   #\033[0m"
-	echo -e "\033[32m#  | | | | |_| | || (_) | |_/ /\__ \ |_) \ V  V /| | | | | |  #\033[0m"
-	echo -e "\033[32m#  \_| |_/\__,_|\__\___/\____/ |___/ .__/ \_/\_/ |_| |_| |_|  #\033[0m"
-	echo -e "\033[32m#                                  | |                        #\033[0m"
-	echo -e "\033[32m#                                  |_|                        #\033[0m"
-	echo -e "\033[32m#                                                             #\033[0m"
-	echo -e "\033[32m#-------------------------------------------------------------#\033[0m"
-	echo -e "\033[32m# SELECCIONE SU SISTEMA OPERATIVO:                            #\033[0m"
-	echo -e "\033[32m#-------------------------------------------------------------#\033[0m"
-	echo -e "\033[32m# (1) Kali                                                    #\033[0m"
-	echo -e "\033[32m# (2) Parrot                                                  #\033[0m"
-	echo -e "\033[32m#-------------------------------------------------------------#\033[0m"
-}
-
-exec()
-{
-	case $1 in
-		1)
-			sudo apt update && sudo apt upgrade && sudo apt install zenity && ./install.sh && ./theme.sh
-			;;
-		2)
-			sudo apt update && sudo parrot-upgrade && ./install.sh && ./theme.sh
-			;;
-		3)
-			echo "Exit script"
-			exit 0
-			;;
-		*)
-			echo "Opcion invalida"
-			;;
-	esac
-}
-
-while true; do
-	menu
-	read -p "> " opcion
-	exec $opcion
-done
+echo "AutoBspwm para Kali Linux (instalación segura)"
+echo "No se ejecutará apt upgrade ni se compilará software desde Git."
+read -r -p "¿Instalar dependencias y elegir un perfil? [S/n] " answer
+if [[ ! $answer =~ ^([nN][oO]?|[nN])$ ]]; then
+  exec ./install.sh
+fi
