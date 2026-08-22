@@ -17,8 +17,16 @@ packages=(
 
 echo "Actualizando el índice de paquetes…"
 sudo apt update
+if apt-cache show zsh-theme-powerlevel10k >/dev/null 2>&1; then
+  packages+=(zsh-theme-powerlevel10k)
+fi
 echo "Instalando BSPWM, Polybar y dependencias desde los repositorios de Kali…"
 sudo apt install -y "${packages[@]}"
+
+# A dedicated X session is the isolation boundary: Kali default never reads a
+# profile's Picom, Polybar, Kitty or Zsh configuration.
+sudo install -Dm755 "$repo_dir/session/autobspwm-session" /usr/local/bin/autobspwm-session
+sudo install -Dm644 "$repo_dir/session/autobspwm.desktop" /usr/share/xsessions/autobspwm.desktop
 
 # Keep an existing shortcut configuration: it may contain user customizations.
 if [[ ! -e "$HOME/.config/sxhkd/sxhkdrc" ]]; then

@@ -1,5 +1,11 @@
 # AutoBspwm
 
+> **Este fork para Kali 2025.2:** usa `./AutoInstall.sh` sin `sudo` y, después
+> de instalar, inicia la sesión **AutoBspwm** en LightDM. No selecciones la
+> entrada genérica **BSPWM**: AutoBspwm mantiene Picom, Polybar, Kitty y Zsh
+> aislados para que la sesión normal de Kali no cambie. Consulta
+> [`docs/KALI-2025.2.md`](docs/KALI-2025.2.md) antes de instalar.
+
 Este es un script de instalación de BSPWM para kali o parrot linux, cabe aclarar que puede funcionar en otras distribuciones base debian sin embargo en las unicas que se mantiene estable y las cuales les daremos soporte será Kali linux y Parrot linux
 
 ## [Instalación]

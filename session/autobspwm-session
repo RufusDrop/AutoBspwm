@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+# Launch BSPWM with an isolated XDG configuration tree.
+set -eu
+
+base_config="${XDG_CONFIG_HOME:-$HOME/.config}"
+active_profile="$base_config/autobspwm/active"
+
+if [ ! -x "$active_profile/bspwm/bspwmrc" ]; then
+  command -v notify-send >/dev/null 2>&1 && \
+    notify-send 'AutoBspwm' 'No hay un perfil instalado. Ejecuta install.sh.'
+  exit 1
+fi
+
+export XDG_CONFIG_HOME="$active_profile"
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+exec bspwm

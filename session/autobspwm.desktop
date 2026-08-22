@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=AutoBspwm
+Comment=AutoBspwm profiles in an isolated session
+Exec=/usr/local/bin/autobspwm-session
+TryExec=/usr/local/bin/autobspwm-session
+Type=Application
+DesktopNames=AutoBspwm
