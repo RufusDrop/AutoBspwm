@@ -49,7 +49,7 @@ for theme in Matterhorn Nord; do
   else
     grep -F 'background #0B1120' "$profile/kitty/kitty.conf" >/dev/null
     grep -F 'POWERLEVEL9K_OS_ICON_BACKGROUND=75' "$profile/zsh/.p10k.zsh" >/dev/null
-    grep -F 'POWERLEVEL9K_OS_ICON_FOREGROUND=75' "$profile/zsh/.p10k.zsh" >/dev/null
+    grep -F 'POWERLEVEL9K_OS_ICON_FOREGROUND=255' "$profile/zsh/.p10k.zsh" >/dev/null
     grep -F 'g = #a1d3ff' "$profile/polybar/colors.ini" >/dev/null
     grep -F 'label-occupied-foreground = ${color.blue}' \
       "$profile/polybar/workspace.ini" >/dev/null

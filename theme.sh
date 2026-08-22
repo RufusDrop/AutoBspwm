@@ -325,7 +325,8 @@ case "$profile" in
     ;;
   Matterhorn)
     p10k_accent=75
-    p10k_icon_foreground=75
+    # Keep the mountain visible: the segment background already uses color 75.
+    p10k_icon_foreground=255
     if [[ $matterhorn_font == true ]]; then
       p10k_icon=''
     else
