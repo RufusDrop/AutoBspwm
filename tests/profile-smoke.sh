@@ -13,10 +13,6 @@ trap 'rm -rf -- "$test_home"' EXIT
 mkdir -p "$test_home/.local/share/autobspwm/powerlevel10k-1.20.18-58e13d1"
 touch "$test_home/.local/share/autobspwm/powerlevel10k-1.20.18-58e13d1/powerlevel10k.zsh-theme"
 
-# The host smoke test may not have Rofi; production uses its parser here.
-rofi() { return 0; }
-export -f rofi
-
 for theme in Matterhorn Nord; do
   HOME="$test_home" XDG_CONFIG_HOME="$test_home/.config" \
     "$repo_dir/theme.sh" "$theme" >/dev/null

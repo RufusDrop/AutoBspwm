@@ -215,7 +215,9 @@ element selected { background-color: @bg-alt; text-color: @accent; }
 element-icon { background-color: transparent; size: 1.5em; margin: 0 10px 0 0; }
 element-text { background-color: transparent; text-color: inherit; }
 EOF
-rofi -no-config -rasi-validate "$profile_dir/rofi/config.rasi" >/dev/null
+# Do not call `rofi -rasi-validate` here. Kali's rofi 2.0.0-0.2 can
+# segfault in that mode even though the same generated config loads normally.
+# A validator crash must never prevent the selected profile from activating.
 if [[ -f "$repo_dir/Themes/$profile/.p10k.zsh" ]]; then
   cp -a "$repo_dir/Themes/$profile/.p10k.zsh" "$profile_dir/zsh/.p10k.zsh"
 elif [[ -f "$repo_dir/Themes/ZLCube/.p10k.zsh" ]]; then
