@@ -1,0 +1,15 @@
+configuration {
+  show-icons: true;
+  font: "Iosevka Nerd Font 11";
+}
+* { bg: __BG__; bg-alt: __BG_ALT__; fg: __FG__; accent: __ACCENT__; }
+window { width: 76%; background-color: @bg; border: 2px; border-color: @accent; border-radius: 14px; }
+mainbox { background-color: transparent; padding: 18px; spacing: 14px; }
+inputbar { background-color: @bg-alt; text-color: @fg; padding: 12px; border-radius: 9px; children: [prompt, entry]; }
+prompt { background-color: transparent; text-color: @accent; padding: 0 12px 0 0; }
+entry { background-color: transparent; text-color: @fg; }
+listview { background-color: transparent; lines: 2; columns: 4; fixed-columns: true; spacing: 12px; }
+element { background-color: @bg-alt; text-color: @fg; orientation: vertical; padding: 10px; border: 2px; border-color: @bg-alt; border-radius: 10px; }
+element selected { background-color: @bg-alt; text-color: @accent; border-color: @accent; }
+element-icon { background-color: transparent; size: 12em; horizontal-align: 0.5; margin: 0 0 7px 0; }
+element-text { background-color: transparent; text-color: inherit; horizontal-align: 0.5; }

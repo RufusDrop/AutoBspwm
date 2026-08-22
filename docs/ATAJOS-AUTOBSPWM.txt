@@ -2,9 +2,12 @@ ATAJOS DE AUTOBSPWM
 ===================
 
 APLICACIONES
-  Super + Enter                 Abrir Kitty
+  Super + Enter                 Abrir Kitty en el escritorio
+  Super + N                     Abrir estas notas
   Super + D                     Buscar aplicaciones con Rofi
   Super + Shift + D             Elegir estilo de Rofi
+  Super + B                     Elegir fondo con previsualización
+  Super + J / K                 Fondo anterior/siguiente
   Super + Shift + F             Firefox
   Super + Shift + B             Burp Suite
 
@@ -27,7 +30,7 @@ VENTANAS
   Super + `                     Última ventana enfocada
   Super + O / I                 Ventana anterior/siguiente del historial
   Super + P                     Enfocar nodo padre
-  Super + B                     Enfocar nodo hermano
+  Super + Ctrl + B              Enfocar nodo hermano
   Super + , / .                 Enfocar primer/segundo hijo
   Super + Ctrl + M              Marcar/desmarcar ventana
   Super + Ctrl + X              Bloquear/desbloquear nodo
@@ -63,6 +66,7 @@ TARGET DE PENTEST
   cleartarget                   Borrar el target
 
 KITTY
+  Ctrl + Shift + N              Nueva ventana conservando el directorio
   Ctrl + Shift + T              Nueva pestaña
   Ctrl + Shift + Derecha        Pestaña siguiente
   Ctrl + Shift + Izquierda      Pestaña anterior

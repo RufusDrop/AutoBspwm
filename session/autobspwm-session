@@ -24,4 +24,36 @@ fi
 
 export XDG_CONFIG_HOME="$active_profile"
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
-exec bspwm
+
+# Keep application chrome at a conventional 96 DPI inside AutoBspwm. Kali's
+# Xfce scaling can otherwise make GTK/Electron interfaces oversized in this
+# lightweight session. Restore the X resource database when BSPWM exits so the
+# normal Kali desktop remains untouched.
+[ -r "$base_config/autobspwm/session.env" ] && \
+  . "$base_config/autobspwm/session.env"
+AUTOBSPWM_DPI="${AUTOBSPWM_DPI:-96}"
+case "$AUTOBSPWM_DPI" in
+  ''|*[!0-9]*) AUTOBSPWM_DPI=96 ;;
+esac
+export GDK_SCALE=1
+export GDK_DPI_SCALE=1
+export QT_AUTO_SCREEN_SCALE_FACTOR=0
+export QT_SCALE_FACTOR=1
+export QT_FONT_DPI="$AUTOBSPWM_DPI"
+
+xresources_backup=""
+if command -v xrdb >/dev/null 2>&1; then
+  xresources_backup="$(mktemp "${TMPDIR:-/tmp}/autobspwm-xresources.XXXXXX")"
+  xrdb -query >"$xresources_backup" 2>/dev/null || :
+  printf 'Xft.dpi: %s\n' "$AUTOBSPWM_DPI" | xrdb -merge
+fi
+
+restore_xresources() {
+  if [ -n "$xresources_backup" ] && [ -f "$xresources_backup" ]; then
+    xrdb -load "$xresources_backup" 2>/dev/null || true
+    rm -f -- "$xresources_backup"
+  fi
+}
+trap restore_xresources EXIT HUP INT TERM
+
+bspwm

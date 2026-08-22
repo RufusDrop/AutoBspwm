@@ -116,6 +116,8 @@ install -Dm755 "$repo_dir/session/set-target.sh" "$profile_dir/bin/settarget"
 install -Dm755 "$repo_dir/scripts/screenshot" "$profile_dir/bin/screenshot"
 install -Dm755 "$repo_dir/session/rofi-launcher.sh" "$profile_dir/bin/rofi-launcher.sh"
 install -Dm755 "$repo_dir/session/rofi-style-selector.sh" "$profile_dir/bin/rofi-style-selector.sh"
+install -Dm755 "$repo_dir/session/desktop-terminal.sh" "$profile_dir/bin/desktop-terminal"
+install -Dm755 "$repo_dir/session/wallpaper-picker.sh" "$profile_dir/bin/wallpaper-picker"
 # The original profiles call extensionless files from Polybar. Install one
 # maintained implementation for both legacy names so the power button remains
 # clickable even when the repository was cloned from Windows.
@@ -125,8 +127,17 @@ install -Dm755 "$repo_dir/session/powermenu.sh" "$profile_dir/polybar/scripts/po
 # open-vm-tools exposes vmware-user, not the obsolete suid wrapper.
 bspwmrc="$profile_dir/bspwm/bspwmrc"
 if [[ -f "$bspwmrc" ]]; then
+  default_wallpaper="$(sed -n -E \
+    's|^[[:space:]]*feh[[:space:]]+--bg-fill[[:space:]]+.*[/]([^/[:space:]]+)[[:space:]]*$|\1|p' \
+    "$bspwmrc" | head -n1)"
+  if [[ -n $default_wallpaper && -f "$profile_dir/Wallpaper/$default_wallpaper" ]]; then
+    printf '%s\n' "$default_wallpaper" >"$profile_dir/Wallpaper/.default"
+  fi
   sed -i 's|^[[:space:]]*vmware-user-suid-wrapper[[:space:]]*\&[[:space:]]*$|command -v vmware-user >/dev/null 2>\&1 \&\& vmware-user \&|' "$bspwmrc"
   sed -i "s|^[[:space:]]*picom[[:space:]]*\&[[:space:]]*$|$escaped_profile_dir/bin/picom-launch.sh|" "$bspwmrc"
+  sed -i -E \
+    "s|^[[:space:]]*feh[[:space:]]+--bg-fill.*$|$escaped_profile_dir/bin/wallpaper-picker startup \&|" \
+    "$bspwmrc"
   cat >>"$bspwmrc" <<'EOF'
 
 # Kept outside individual profiles, so a profile switch preserves the layout.
@@ -162,6 +173,7 @@ font_family Iosevka Nerd Font
 font_size 12
 enable_audio_bell no
 confirm_os_window_close 0
+map ctrl+shift+n new_os_window_with_cwd
 window_padding_width 12
 background_opacity 0.88
 dynamic_background_opacity yes
@@ -291,6 +303,12 @@ for rofi_style in lista compacto rejilla; do
     -e "s|__ACCENT__|$accent|g" \
     "$repo_dir/session/rofi/$rofi_style.rasi" >"$profile_dir/rofi/styles/$rofi_style.rasi"
 done
+sed \
+  -e "s|__BG__|$bg|g" \
+  -e "s|__BG_ALT__|$bg_alt|g" \
+  -e "s|__FG__|$fg|g" \
+  -e "s|__ACCENT__|$accent|g" \
+  "$repo_dir/session/rofi/wallpaper.rasi" >"$profile_dir/rofi/wallpaper.rasi"
 # Do not call `rofi -rasi-validate` here. Kali's rofi 2.0.0-0.2 can
 # segfault in that mode even though the same generated config loads normally.
 # A validator crash must never prevent the selected profile from activating.
@@ -307,7 +325,7 @@ case "$profile" in
     ;;
   Matterhorn)
     p10k_accent=75
-    p10k_icon_foreground=255
+    p10k_icon_foreground=75
     if [[ $matterhorn_font == true ]]; then
       p10k_icon=''
     else

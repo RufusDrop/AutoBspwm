@@ -66,11 +66,16 @@ windows hold mover libremente la ventana
 windows clic derecho reescalar libremente la ventana
 windows + alt + flechas escalar ventana
 windows + ctrl + flechas mover ventana
+control + shift + n abre otra ventana de terminal en el mismo directorio
 control + shift + t abre pestaña en terminal
 control shift alt t renombrar pestaña de terminal
 control shift w cerrar pestaña de terminal
 windows + "1,2,3,4,5,6,7,8,9,0" cambiar de escritorio
 windows + shift + "1,2,3,4,5,6,7,8,9,0" cambiar de escritorio la ventana actual al escritorio seleccionado
+
+`Super+B` abre un selector de fondos con miniaturas. `Super+J` y `Super+K`
+aplican el fondo anterior o siguiente del directorio `Wallpaper` del perfil.
+La selección queda guardada por perfil. `Super+N` abre la chuleta de atajos.
 
 
 Los dot files los puedes modificar en las siguientes rutas.

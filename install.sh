@@ -12,6 +12,7 @@ packages=(
   bspwm sxhkd polybar picom rofi feh dunst kitty git lsd bat binutils
   fontforge-nox python3-fontforge i3lock
   x11-xserver-utils x11-xkb-utils xclip xdotool scrot wmname acpi imagemagick
+  xdg-utils xdg-user-dirs
   open-vm-tools-desktop zsh zsh-autosuggestions zsh-syntax-highlighting
   fonts-noto-color-emoji fonts-font-awesome
 )

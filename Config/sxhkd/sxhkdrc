@@ -4,7 +4,18 @@
 
 # terminal emulator
 super + Return
-	/usr/bin/kitty
+	$XDG_CONFIG_HOME/bin/desktop-terminal
+
+# AutoBspwm notes/shortcut reference
+super + n
+	xdg-open "$(xdg-user-dir DESKTOP)/Atajos-AutoBspwm.txt"
+
+# visual wallpaper picker and quick previous/next cycling
+super + b
+	$XDG_CONFIG_HOME/bin/wallpaper-picker choose
+
+super + {j,k}
+	$XDG_CONFIG_HOME/bin/wallpaper-picker {previous,next}
 
 # lock screen
 super + shift + l
@@ -68,8 +79,12 @@ super + {_,shift + }{Left,Down,Up,Right}
 	bspc node -{f,s} {west,south,north,east}
 
 # focus the node for the given path jump
-super + {p,b,comma,period}
-	bspc node -f @{parent,brother,first,second}
+super + {p,comma,period}
+	bspc node -f @{parent,first,second}
+
+# Super+B belongs to the wallpaper picker; retain brother navigation here.
+super + ctrl + b
+	bspc node -f @brother
 
 # focus the next/previous window in the current desktop
 super + {_,shift + }c
