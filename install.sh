@@ -16,15 +16,75 @@ packages=(
   fonts-noto-color-emoji fonts-font-awesome
 )
 
-echo "Actualizando el índice de paquetes…"
-sudo apt update
-echo "Instalando BSPWM, Polybar y dependencias desde los repositorios de Kali…"
-sudo apt install -y "${packages[@]}"
+repair_zsh_history() {
+  # Repair this before touching APT when Zsh is already present. Otherwise a
+  # temporarily desynchronised Kali mirror would leave the user's history in
+  # the same broken state merely because dependency installation stopped.
+  command -v zsh >/dev/null 2>&1 || return 0
+  bash "$repo_dir/session/repair-zsh-history.sh"
+}
+
+# http.kali.org is Kali's official load balancer. During a rolling repository
+# publication one backend can briefly advertise packages that another backend
+# does not have yet. Avoid cached redirects and retry after refreshing indexes;
+# do not change the user's sources and do not hide missing dependencies with
+# --fix-missing.
+apt_get=(
+  sudo apt-get
+  -o Acquire::Retries=5
+  -o Acquire::http::No-Cache=true
+  -o Acquire::https::No-Cache=true
+  -o Acquire::http::Pipeline-Depth=0
+)
+
+refresh_package_indexes() {
+  local attempt
+  for attempt in 1 2 3; do
+    echo "Actualizando el índice de paquetes (intento $attempt/3)…"
+    if "${apt_get[@]}" update; then
+      return 0
+    fi
+    if (( attempt < 3 )); then
+      echo "El mirror no respondió correctamente; se reintentará."
+    fi
+  done
+  echo "No se pudieron actualizar los índices de los repositorios de Kali." >&2
+  return 1
+}
+
+install_dependencies() {
+  local attempt
+  for attempt in 1 2 3; do
+    echo "Instalando BSPWM, Polybar y dependencias (intento $attempt/3)…"
+    if "${apt_get[@]}" install -y "${packages[@]}"; then
+      return 0
+    fi
+
+    if (( attempt == 3 )); then
+      echo >&2
+      echo "APT no pudo descargar todos los paquetes después de 3 intentos." >&2
+      echo "No se ha aplicado ningún perfil de AutoBspwm." >&2
+      echo "Comprueba que Kali use únicamente su repositorio oficial kali-rolling:" >&2
+      echo "  deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware" >&2
+      echo "Si la fuente ya es correcta, el mirror continúa sincronizándose; espera unos minutos" >&2
+      echo "y vuelve a ejecutar ./AutoInstall.sh. No es necesario ejecutar apt upgrade." >&2
+      return 1
+    fi
+
+    echo "APT devolvió un error de descarga; limpiando su caché y renovando índices…" >&2
+    sudo apt-get clean || true
+    refresh_package_indexes || true
+  done
+}
+
+repair_zsh_history
+refresh_package_indexes
+install_dependencies
 
 # An unclean VMware shutdown can leave NUL bytes in .zsh_history. Recover the
-# readable commands after APT has made zsh available, retaining the original
-# file with a timestamp instead of silently discarding history.
-bash "$repo_dir/session/repair-zsh-history.sh"
+# readable commands now if APT has just made Zsh available. The helper is
+# idempotent and retains the original file with a timestamp.
+repair_zsh_history
 
 # Kali rolling does not always publish zsh-theme-powerlevel10k. Keep a pinned
 # copy below ~/.local so the AutoBspwm prompt does not depend on that package
