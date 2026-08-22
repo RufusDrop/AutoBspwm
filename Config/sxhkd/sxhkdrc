@@ -6,14 +6,18 @@
 super + Return
 	/usr/bin/kitty
 
-# i3lock 
-shift + l
-	/usr/bin/i3lock-everblush
+# lock screen
+super + shift + l
+	/usr/bin/i3lock -c 101923
 
 
 # program launcher
 super + d
-	rofi -show run
+	$XDG_CONFIG_HOME/bin/rofi-launcher.sh
+
+# choose the private Rofi application-launcher style
+super + shift + d
+	$XDG_CONFIG_HOME/bin/rofi-style-selector.sh
 
 # make sxhkd reload its configuration files:
 super + Escape
@@ -69,6 +73,10 @@ super + {p,b,comma,period}
 
 # focus the next/previous window in the current desktop
 super + {_,shift + }c
+	bspc node -f {next,prev}.local.!hidden.window
+
+# familiar Alt+Tab window cycle
+alt + {_,shift + }Tab
 	bspc node -f {next,prev}.local.!hidden.window
 
 # focus the next/previous desktop in the current monitor
@@ -146,10 +154,10 @@ super + shift + b
 ###############
 
 @Print
-        screenshot select
+	$XDG_CONFIG_HOME/bin/screenshot select
 
 @Print + ctrl
-        screenshot
+	$XDG_CONFIG_HOME/bin/screenshot
 
 @Print + alt
-        screenshot window
+	$XDG_CONFIG_HOME/bin/screenshot window

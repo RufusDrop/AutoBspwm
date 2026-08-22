@@ -1,0 +1,17 @@
+configuration {
+  modi: "drun";
+  show-icons: true;
+  font: "Iosevka Nerd Font 11";
+  drun-display-format: "{name}";
+}
+* { bg: __BG__; bg-alt: __BG_ALT__; fg: __FG__; accent: __ACCENT__; }
+window { location: north; anchor: north; y-offset: 72px; width: 34%; background-color: @bg; border: 2px; border-color: @accent; border-radius: 10px; }
+mainbox { background-color: transparent; padding: 10px; spacing: 6px; }
+inputbar { background-color: @bg-alt; text-color: @fg; padding: 9px; border-radius: 7px; children: [prompt, entry]; }
+prompt { background-color: transparent; text-color: @accent; padding: 0 8px 0 0; }
+entry { background-color: transparent; text-color: @fg; }
+listview { background-color: transparent; lines: 7; columns: 1; spacing: 3px; }
+element { background-color: transparent; text-color: @fg; padding: 7px; border-radius: 6px; }
+element selected { background-color: @accent; text-color: @bg; }
+element-icon { background-color: transparent; size: 1.35em; margin: 0 9px 0 0; }
+element-text { background-color: transparent; text-color: inherit; }

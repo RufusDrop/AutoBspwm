@@ -73,6 +73,14 @@ if [[ -e "$profile_dir" ]]; then
   mv "$profile_dir" "$backup_dir/$profile"
 fi
 cp -a "$source_dir/." "$profile_dir/"
+# Some legacy profiles reference ${color.g} without defining it. Polybar then
+# starts bars with missing foregrounds, which looks like a row of empty blocks.
+colors_file="$profile_dir/polybar/colors.ini"
+if [[ -f "$colors_file" ]] && ! grep -Eq '^[[:space:]]*g[[:space:]]*=' "$colors_file"; then
+  fallback_accent="$(sed -n -E 's/^[[:space:]]*ac[[:space:]]*=[[:space:]]*(#[[:xdigit:]]+).*/\1/p' "$colors_file" | head -n1)"
+  [[ -n $fallback_accent ]] || fallback_accent='#88C0D0'
+  printf 'g = %s\n' "$fallback_accent" >>"$colors_file"
+fi
 # sxhkd follows XDG_CONFIG_HOME too; place the shared key bindings beside the
 # profile so Super+Enter, Super+D and workspace shortcuts work in AutoBspwm.
 if [[ ! -f "$profile_dir/sxhkd/sxhkdrc" ]]; then
@@ -104,6 +112,10 @@ done < <(find "$profile_dir" -type f -not -path '*/fonts/*' -print0)
 install -Dm755 "$repo_dir/session/polybar-launch.sh" "$profile_dir/polybar/launch.sh"
 install -Dm644 "$repo_dir/session/picom.conf" "$profile_dir/picom/picom.conf"
 install -Dm755 "$repo_dir/session/picom-launch.sh" "$profile_dir/bin/picom-launch.sh"
+install -Dm755 "$repo_dir/session/set-target.sh" "$profile_dir/bin/settarget"
+install -Dm755 "$repo_dir/scripts/screenshot" "$profile_dir/bin/screenshot"
+install -Dm755 "$repo_dir/session/rofi-launcher.sh" "$profile_dir/bin/rofi-launcher.sh"
+install -Dm755 "$repo_dir/session/rofi-style-selector.sh" "$profile_dir/bin/rofi-style-selector.sh"
 # The original profiles call extensionless files from Polybar. Install one
 # maintained implementation for both legacy names so the power button remains
 # clickable even when the repository was cloned from Windows.
@@ -133,6 +145,10 @@ case "$profile" in
     bg='#0B1120'; bg_alt='#14213A'; fg='#D9E7FF'; accent='#62A0EA'
     blue='#5E9EFF'; cyan='#67D4E7'; green='#75D6A5'; red='#F07178'; yellow='#E6C177'; magenta='#78B7FF'
     ;;
+  S4vi)
+    bg='#18141E'; bg_alt='#2A202C'; fg='#F4EDF6'; accent='#E04468'
+    blue='#7697E8'; cyan='#6BC7D9'; green='#72C98F'; red='#E04468'; yellow='#E3B55E'; magenta='#C66F9B'
+    ;;
   *)
     bg='#15111F'; bg_alt='#241C34'; fg='#E8E4F2'; accent='#A486DD'
     blue='#7AA2F7'; cyan='#7DCFFF'; green='#73DACA'; red='#F7768E'; yellow='#E0AF68'; magenta='#BB9AF7'
@@ -149,6 +165,18 @@ confirm_os_window_close 0
 window_padding_width 12
 background_opacity 0.88
 dynamic_background_opacity yes
+tab_bar_edge bottom
+tab_bar_style powerline
+tab_powerline_style slanted
+tab_bar_background $bg
+tab_bar_margin_color $bg
+active_tab_foreground $bg
+active_tab_background $accent
+active_tab_font_style bold
+inactive_tab_foreground $fg
+inactive_tab_background $bg_alt
+inactive_tab_font_style normal
+tab_title_template " {index}: {title} "
 foreground $fg
 background $bg
 selection_foreground $bg
@@ -172,6 +200,20 @@ color13 $magenta
 color14 $cyan
 color15 $fg
 EOF
+if fc-match -f '%{family}\n' 'AutoBspwm Mountain' 2>/dev/null | grep -Fq 'AutoBspwm Mountain'; then
+  printf '%s\n' 'symbol_map U+E000 AutoBspwm Mountain' >>"$profile_dir/kitty/kitty.conf"
+  matterhorn_font=true
+else
+  matterhorn_font=false
+fi
+if [[ $profile == Matterhorn && $matterhorn_font == false ]]; then
+  sed -i \
+    -e 's//▲▴/g' \
+    -e 's/^content-font = 8$/content-font = 1/' \
+    -e 's/^content-font = 4$/content-font = 1/' \
+    -e '/^label-active-font = 4$/d' \
+    "$profile_dir/polybar/current.ini" "$profile_dir/polybar/workspace.ini"
+fi
 cat >"$profile_dir/zsh/.zshrc" <<'EOF'
 # Reuse Kali's aliases, completion and history policy without modifying it.
 [[ -r "$HOME/.zshrc" ]] && source "$HOME/.zshrc"
@@ -195,6 +237,9 @@ if (( $+commands[batcat] )); then
   alias cat='batcat --paging=never'
   alias catn='/bin/cat'
 fi
+
+settarget() { "$XDG_CONFIG_HOME/bin/settarget" "$@"; }
+cleartarget() { "$XDG_CONFIG_HOME/bin/settarget" --clear; }
 
 typeset -g POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
 source "$HOME/.local/share/autobspwm/powerlevel10k-1.20.18-58e13d1/powerlevel10k.zsh-theme"
@@ -235,6 +280,17 @@ element selected { background-color: @bg-alt; text-color: @accent; }
 element-icon { background-color: transparent; size: 1.5em; margin: 0 10px 0 0; }
 element-text { background-color: transparent; text-color: inherit; }
 EOF
+# Super+D can switch between three profile-coloured launchers without writing
+# Rofi configuration into Kali's normal desktop.
+install -d "$profile_dir/rofi/styles"
+for rofi_style in lista compacto rejilla; do
+  sed \
+    -e "s|__BG__|$bg|g" \
+    -e "s|__BG_ALT__|$bg_alt|g" \
+    -e "s|__FG__|$fg|g" \
+    -e "s|__ACCENT__|$accent|g" \
+    "$repo_dir/session/rofi/$rofi_style.rasi" >"$profile_dir/rofi/styles/$rofi_style.rasi"
+done
 # Do not call `rofi -rasi-validate` here. Kali's rofi 2.0.0-0.2 can
 # segfault in that mode even though the same generated config loads normally.
 # A validator crash must never prevent the selected profile from activating.
@@ -244,19 +300,49 @@ elif [[ -f "$repo_dir/Themes/ZLCube/.p10k.zsh" ]]; then
   cp -a "$repo_dir/Themes/ZLCube/.p10k.zsh" "$profile_dir/zsh/.p10k.zsh"
 fi
 case "$profile" in
-  Nord) p10k_accent=110 ;;
-  Matterhorn) p10k_accent=75 ;;
-  *) p10k_accent= ;;
+  Nord)
+    p10k_accent=110
+    p10k_icon_foreground=232
+    p10k_icon='▲▴'
+    ;;
+  Matterhorn)
+    p10k_accent=75
+    p10k_icon_foreground=255
+    if [[ $matterhorn_font == true ]]; then
+      p10k_icon=''
+    else
+      p10k_icon='▲▴'
+    fi
+    ;;
+  *)
+    p10k_accent=
+    p10k_icon_foreground=
+    p10k_icon=
+    ;;
 esac
 if [[ -n $p10k_accent && -f "$profile_dir/zsh/.p10k.zsh" ]]; then
   sed -i -E \
+    -e "s|^(  typeset -g POWERLEVEL9K_OS_ICON_FOREGROUND)=[0-9]+$|\1=$p10k_icon_foreground|" \
     -e "s|^(  typeset -g POWERLEVEL9K_OS_ICON_BACKGROUND)=[0-9]+$|\1=$p10k_accent|" \
-    -e "s|^(  typeset -g POWERLEVEL9K_OS_ICON_CONTENT_EXPANSION)=.*$|\1='▲▴'|" \
+    -e "s|^(  typeset -g POWERLEVEL9K_OS_ICON_CONTENT_EXPANSION)=.*$|\1='$p10k_icon'|" \
     -e "s|^(  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_\{VIINS,VICMD,VIVIS,VIOWR\}_FOREGROUND)=[0-9]+$|\1=$p10k_accent|" \
     -e "s|^(  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND)=[0-9]+$|\1=$p10k_accent|" \
     -e "s|^(  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND)=[0-9]+$|\1=$p10k_accent|" \
     "$profile_dir/zsh/.p10k.zsh"
 fi
+
+# The bar reports any tunnel as a VPN; HTB is only one possible provider.
+if [[ -f "$profile_dir/bin/htb_status.sh" ]]; then
+  sed -i 's/HTB/VPN/g' "$profile_dir/bin/htb_status.sh"
+fi
+
+# Keep a local reference on the desktop. xdg-user-dir handles translated
+# Desktop directory names while retaining Kali's usual ~/Desktop fallback.
+desktop_dir="$(xdg-user-dir DESKTOP 2>/dev/null || true)"
+[[ -n $desktop_dir ]] || desktop_dir="$HOME/Desktop"
+install -Dm644 "$repo_dir/docs/ATAJOS-AUTOBSPWM.txt" \
+  "$desktop_dir/Atajos-AutoBspwm.txt"
+install -d "$HOME/ScreenShots"
 
 local_file="$autobspwm_dir/local.sh"
 if [[ ! -f "$local_file" ]]; then

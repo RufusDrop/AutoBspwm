@@ -1,0 +1,71 @@
+ATAJOS DE AUTOBSPWM
+===================
+
+APLICACIONES
+  Super + Enter                 Abrir Kitty
+  Super + D                     Buscar aplicaciones con Rofi
+  Super + Shift + D             Elegir estilo de Rofi
+  Super + Shift + F             Firefox
+  Super + Shift + B             Burp Suite
+
+VENTANAS
+  Alt + Tab                     Ventana siguiente del escritorio
+  Alt + Shift + Tab             Ventana anterior del escritorio
+  Super + Flechas               Enfocar ventana en una dirección
+  Super + Shift + Flechas       Intercambiar ventanas
+  Super + W                     Cerrar ventana
+  Super + Shift + W             Forzar cierre
+  Super + F                     Pantalla completa
+  Super + T                     Modo mosaico
+  Super + Shift + T             Pseudo-mosaico
+  Super + S                     Ventana flotante
+  Super + M                     Alternar mosaico/monocle
+  Super + G                     Intercambiar con la ventana más grande
+  Super + Y                     Enviar ventana marcada a la preselección
+  Super + C                     Ventana siguiente
+  Super + Shift + C             Ventana anterior
+  Super + `                     Última ventana enfocada
+  Super + O / I                 Ventana anterior/siguiente del historial
+  Super + P                     Enfocar nodo padre
+  Super + B                     Enfocar nodo hermano
+  Super + , / .                 Enfocar primer/segundo hijo
+  Super + Ctrl + M              Marcar/desmarcar ventana
+  Super + Ctrl + X              Bloquear/desbloquear nodo
+  Super + Ctrl + Y              Ventana sticky/no sticky
+  Super + Ctrl + Z              Ventana privada/no privada
+  Super + Alt + Flechas         Redimensionar ventana
+  Super + Ctrl + Flechas        Mover ventana flotante
+
+PRESELECCIÓN BSPWM
+  Super + Ctrl + Alt + Flechas  Elegir dirección de la próxima ventana
+  Super + Ctrl + 1..9           Elegir proporción 0.1..0.9
+  Super + Ctrl + Espacio        Cancelar preselección del nodo
+  Super + Ctrl + Alt + Espacio  Cancelar todas las preselecciones
+
+ESCRITORIOS
+  Super + 1..0                  Ir al escritorio 1..10
+  Super + Shift + 1..0          Mover ventana al escritorio 1..10
+  Super + [ / ]                 Escritorio anterior/siguiente
+  Super + Tab                   Último escritorio
+
+SISTEMA
+  Super + Escape                Recargar atajos de sxhkd
+  Super + Shift + L             Bloquear pantalla
+  Super + Alt + Q               Cerrar sesión AutoBspwm
+  Super + Alt + R               Reiniciar BSPWM
+  Impr Pant                     Captura de una selección
+  Ctrl + Impr Pant              Captura de toda la pantalla
+  Alt + Impr Pant               Captura de la ventana
+
+TARGET DE PENTEST
+  settarget 10.10.10.10 maquina  Mostrar IP y nombre en Polybar
+  settarget                     Consultar el target actual
+  cleartarget                   Borrar el target
+
+KITTY
+  Ctrl + Shift + T              Nueva pestaña
+  Ctrl + Shift + Derecha        Pestaña siguiente
+  Ctrl + Shift + Izquierda      Pestaña anterior
+  Ctrl + Shift + Q              Cerrar pestaña
+
+Super es la tecla Windows.
