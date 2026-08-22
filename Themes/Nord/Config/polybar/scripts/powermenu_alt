@@ -30,7 +30,7 @@ case $chosen in
         systemctl suspend
         ;;
     $logout)
-        kill -9 -1
+        bspc quit
         ;;
 esac
 

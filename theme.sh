@@ -104,6 +104,11 @@ done < <(find "$profile_dir" -type f -not -path '*/fonts/*' -print0)
 install -Dm755 "$repo_dir/session/polybar-launch.sh" "$profile_dir/polybar/launch.sh"
 install -Dm644 "$repo_dir/session/picom.conf" "$profile_dir/picom/picom.conf"
 install -Dm755 "$repo_dir/session/picom-launch.sh" "$profile_dir/bin/picom-launch.sh"
+# The original profiles call extensionless files from Polybar. Install one
+# maintained implementation for both legacy names so the power button remains
+# clickable even when the repository was cloned from Windows.
+install -Dm755 "$repo_dir/session/powermenu.sh" "$profile_dir/polybar/scripts/powermenu"
+install -Dm755 "$repo_dir/session/powermenu.sh" "$profile_dir/polybar/scripts/powermenu_alt"
 
 # open-vm-tools exposes vmware-user, not the obsolete suid wrapper.
 bspwmrc="$profile_dir/bspwm/bspwmrc"
@@ -126,7 +131,7 @@ case "$profile" in
     ;;
   Matterhorn)
     bg='#0B1120'; bg_alt='#14213A'; fg='#D9E7FF'; accent='#62A0EA'
-    blue='#5E9EFF'; cyan='#67D4E7'; green='#75D6A5'; red='#F07178'; yellow='#E6C177'; magenta='#91A7FF'
+    blue='#5E9EFF'; cyan='#67D4E7'; green='#75D6A5'; red='#F07178'; yellow='#E6C177'; magenta='#78B7FF'
     ;;
   *)
     bg='#15111F'; bg_alt='#241C34'; fg='#E8E4F2'; accent='#A486DD'
@@ -174,7 +179,22 @@ cat >"$profile_dir/zsh/.zshrc" <<'EOF'
 : ${HISTSIZE:=10000}
 : ${SAVEHIST:=10000}
 setopt append_history share_history hist_ignore_dups
-(( $+aliases[ll] )) || alias ll='ls -lah --color=auto'
+
+# Restore the colourful file type, permission and Git indicators from the
+# original AutoBspwm setup. Keep a normal GNU ls fallback if lsd is unavailable.
+if (( $+commands[lsd] )); then
+  alias ls='lsd --group-dirs=first'
+  alias l='lsd --group-dirs=first'
+  alias ll='lsd -lh --group-dirs=first'
+  alias la='lsd -a --group-dirs=first'
+  alias lla='lsd -lha --group-dirs=first'
+else
+  alias ll='ls -lah --color=auto'
+fi
+if (( $+commands[batcat] )); then
+  alias cat='batcat --paging=never'
+  alias catn='/bin/cat'
+fi
 
 typeset -g POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
 source "$HOME/.local/share/autobspwm/powerlevel10k-1.20.18-58e13d1/powerlevel10k.zsh-theme"
@@ -230,9 +250,11 @@ case "$profile" in
 esac
 if [[ -n $p10k_accent && -f "$profile_dir/zsh/.p10k.zsh" ]]; then
   sed -i -E \
-    -e "s|^(  typeset -g POWERLEVEL9K_OS_ICON_BACKGROUND)=013$|\1=$p10k_accent|" \
-    -e "s|^(  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND)=013$|\1=$p10k_accent|" \
-    -e "s|^(  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND)=013$|\1=$p10k_accent|" \
+    -e "s|^(  typeset -g POWERLEVEL9K_OS_ICON_BACKGROUND)=[0-9]+$|\1=$p10k_accent|" \
+    -e "s|^(  typeset -g POWERLEVEL9K_OS_ICON_CONTENT_EXPANSION)=.*$|\1='▲▴'|" \
+    -e "s|^(  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_\{VIINS,VICMD,VIVIS,VIOWR\}_FOREGROUND)=[0-9]+$|\1=$p10k_accent|" \
+    -e "s|^(  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND)=[0-9]+$|\1=$p10k_accent|" \
+    -e "s|^(  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND)=[0-9]+$|\1=$p10k_accent|" \
     "$profile_dir/zsh/.p10k.zsh"
 fi
 
@@ -252,8 +274,11 @@ printf '%s\n' "$profile" >"$autobspwm_dir/.active-profile.new"
 mv -f -- "$autobspwm_dir/.active-profile.new" "$autobspwm_dir/active-profile"
 find "$profile_dir/bspwm" -type f -name 'bspwmrc' -exec chmod 700 {} + 2>/dev/null || true
 find "$profile_dir/bspwm/scripts" -type f -exec chmod 700 {} + 2>/dev/null || true
-find "$profile_dir/bin" -type f -name '*.sh' -exec chmod 700 {} + 2>/dev/null || true
-find "$profile_dir/polybar" -type f -name '*.sh' -exec chmod 700 {} + 2>/dev/null || true
+# Several original helpers intentionally have no .sh suffix (`target`,
+# `launcher`, `powermenu_alt`). They are commands too and need execute bits.
+find "$profile_dir/bin" -maxdepth 1 -type f -exec chmod 700 {} + 2>/dev/null || true
+find "$profile_dir/polybar/scripts" -maxdepth 1 -type f -exec chmod 700 {} + 2>/dev/null || true
+find "$profile_dir/polybar" -maxdepth 1 -type f -name '*.sh' -exec chmod 700 {} + 2>/dev/null || true
 
 echo "Perfil $profile instalado en $profile_dir"
 echo "En LightDM elige la sesión 'AutoBspwm', no la entrada BSPWM genérica."

@@ -9,7 +9,7 @@ fi
 
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 packages=(
-  bspwm sxhkd polybar picom rofi feh dunst kitty git
+  bspwm sxhkd polybar picom rofi feh dunst kitty git lsd bat
   x11-xserver-utils x11-xkb-utils xclip xdotool scrot wmname acpi imagemagick
   open-vm-tools-desktop zsh zsh-autosuggestions zsh-syntax-highlighting
   fonts-noto-color-emoji fonts-font-awesome
