@@ -64,6 +64,7 @@ TARGET DE PENTEST
   settarget 10.10.10.10 maquina  Mostrar IP y nombre en Polybar
   settarget                     Consultar el target actual
   cleartarget                   Borrar el target
+  Clic en IP local/VPN/target   Copiar la dirección al portapapeles
 
 KITTY
   Ctrl + Shift + N              Nueva ventana conservando el directorio

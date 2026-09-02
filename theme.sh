@@ -118,6 +118,7 @@ install -Dm755 "$repo_dir/session/rofi-launcher.sh" "$profile_dir/bin/rofi-launc
 install -Dm755 "$repo_dir/session/rofi-style-selector.sh" "$profile_dir/bin/rofi-style-selector.sh"
 install -Dm755 "$repo_dir/session/desktop-terminal.sh" "$profile_dir/bin/desktop-terminal"
 install -Dm755 "$repo_dir/session/wallpaper-picker.sh" "$profile_dir/bin/wallpaper-picker"
+install -Dm755 "$repo_dir/session/copy-polybar-ip.sh" "$profile_dir/bin/copy-polybar-ip"
 # The original profiles call extensionless files from Polybar. Install one
 # maintained implementation for both legacy names so the power button remains
 # clickable even when the repository was cloned from Windows.
@@ -317,6 +318,19 @@ if [[ -f "$repo_dir/Themes/$profile/.p10k.zsh" ]]; then
 elif [[ -f "$repo_dir/Themes/ZLCube/.p10k.zsh" ]]; then
   cp -a "$repo_dir/Themes/ZLCube/.p10k.zsh" "$profile_dir/zsh/.p10k.zsh"
 fi
+
+# Make the three IP widgets useful without coupling the clipboard behavior to
+# the colours or output format of each legacy profile. The helper extracts the
+# same IPv4 that the corresponding module currently displays.
+polybar_current="$profile_dir/polybar/current.ini"
+if [[ -f $polybar_current ]]; then
+  sed -i -E \
+    -e "/^[[:space:]]*exec[[:space:]]*=.*ethernet_status\.sh[[:space:]]*$/a click-left = $escaped_profile_dir/bin/copy-polybar-ip local" \
+    -e "/^[[:space:]]*exec[[:space:]]*=.*htb_status\.sh[[:space:]]*$/a click-left = $escaped_profile_dir/bin/copy-polybar-ip vpn" \
+    -e "/^[[:space:]]*exec[[:space:]]*=.*htb_target\.sh[[:space:]]*$/a click-left = $escaped_profile_dir/bin/copy-polybar-ip target" \
+    "$polybar_current"
+fi
+
 case "$profile" in
   Nord)
     p10k_accent=110

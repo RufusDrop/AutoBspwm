@@ -23,6 +23,7 @@ for theme in Matterhorn Nord; do
   test -x "$profile/bin/picom-launch.sh"
   test -x "$profile/bin/desktop-terminal"
   test -x "$profile/bin/wallpaper-picker"
+  test -x "$profile/bin/copy-polybar-ip"
   test -r "$profile/rofi/config.rasi"
   test -r "$profile/rofi/wallpaper.rasi"
   test -r "$profile/kitty/kitty.conf"
@@ -35,6 +36,9 @@ for theme in Matterhorn Nord; do
   grep -F 'label-active-foreground = ${color.g}' "$profile/polybar/workspace.ini" >/dev/null
   grep -F "$profile/bin/wallpaper-picker startup" "$profile/bspwm/bspwmrc" >/dev/null
   grep -F 'wallpaper-picker choose' "$profile/sxhkd/sxhkdrc" >/dev/null
+  grep -F "$profile/bin/copy-polybar-ip local" "$profile/polybar/current.ini" >/dev/null
+  grep -F "$profile/bin/copy-polybar-ip vpn" "$profile/polybar/current.ini" >/dev/null
+  grep -F "$profile/bin/copy-polybar-ip target" "$profile/polybar/current.ini" >/dev/null
   grep -F 'xdg-open "$(xdg-user-dir DESKTOP)/Atajos-AutoBspwm.txt"' \
     "$profile/sxhkd/sxhkdrc" >/dev/null
   grep -F 'map ctrl+shift+n new_os_window_with_cwd' "$profile/kitty/kitty.conf" >/dev/null
