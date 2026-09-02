@@ -35,17 +35,23 @@ AUTOBSPWM_DPI="${AUTOBSPWM_DPI:-96}"
 case "$AUTOBSPWM_DPI" in
   ''|*[!0-9]*) AUTOBSPWM_DPI=96 ;;
 esac
+AUTOBSPWM_CURSOR_SIZE="${AUTOBSPWM_CURSOR_SIZE:-24}"
+case "$AUTOBSPWM_CURSOR_SIZE" in
+  ''|*[!0-9]*) AUTOBSPWM_CURSOR_SIZE=24 ;;
+esac
 export GDK_SCALE=1
 export GDK_DPI_SCALE=1
 export QT_AUTO_SCREEN_SCALE_FACTOR=0
 export QT_SCALE_FACTOR=1
 export QT_FONT_DPI="$AUTOBSPWM_DPI"
+export XCURSOR_SIZE="$AUTOBSPWM_CURSOR_SIZE"
 
 xresources_backup=""
 if command -v xrdb >/dev/null 2>&1; then
   xresources_backup="$(mktemp "${TMPDIR:-/tmp}/autobspwm-xresources.XXXXXX")"
   xrdb -query >"$xresources_backup" 2>/dev/null || :
-  printf 'Xft.dpi: %s\n' "$AUTOBSPWM_DPI" | xrdb -merge
+  printf 'Xft.dpi: %s\nXcursor.size: %s\n' \
+    "$AUTOBSPWM_DPI" "$AUTOBSPWM_CURSOR_SIZE" | xrdb -merge
 fi
 
 restore_xresources() {
