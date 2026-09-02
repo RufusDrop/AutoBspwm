@@ -33,6 +33,3 @@ if ! command -v xclip >/dev/null 2>&1; then
 fi
 
 printf '%s' "$ip" | xclip -selection clipboard
-if command -v notify-send >/dev/null 2>&1; then
-  notify-send 'IP copiada' "$ip" 2>/dev/null || true
-fi
